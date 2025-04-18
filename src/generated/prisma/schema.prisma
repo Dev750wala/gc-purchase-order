@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String          @id @default(cuid())
+  email         String          @unique
+  name          String?
+  phoneNumber   Int
+  empId         String
+  role          String
+  pfpUrl        String?
+  password      String
+  PurchaseOrder PurchaseOrder[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PurchaseOrder {
+  id       String  @id @default(cuid())
+  masterPO Boolean
+  PO       String
+
+  // Left Section
+  date          String
+  vendor        String
+  address1      String
+  attention     String
+  tel           String
+  ext           String
+  email         String
+  holdToShipYes Boolean
+  holdToShipNo  Boolean
+  pickUp        Boolean
+  shipTo        Boolean
+  driverContact String
+  driverTel     String
+  siteContact   String
+  siteTel       String
+  address2      String
+  deliveryNotes String
+  date1         String
+  time1         String
+  date2         String
+  time2         String
+  date3         String
+  time3         String
+  date4         String
+  time4         String
+
+  // Right Section
+  jobNumber        String
+  jobName          String
+  jobTask          String
+  officeContact    String
+  officeTel        String
+  requestedBy      String
+  orderedBy        String
+  rightDate        String
+  rightTime        String
+  coCe             String
+  rightNotes       String
+  approxCost       String
+  amex             Boolean
+  amexText         String
+  cod              Boolean
+  onAccount        Boolean
+  other            Boolean
+  otherText        String
+  taxExemptYes     Boolean
+  taxExemptNo      Boolean
+  vendorQuoteYes   Boolean
+  vendorQuoteNo    Boolean
+  ccPo             String
+  author           String
+  authorSignature  String
+  pmName           String
+  pmSignature      String
+  approvedBy       String
+  approvedDate     String
+  rightBottomNotes String
+
+  // Flattened Line Item Fields
+  description   String
+  quantity      String
+  um            String
+  unitCost      String
+  total         String
+  jobEquipNotes String
+  costCode      String
+  payItem       String
+
+  // Bottom Section
+  subtotal    String
+  delivery    String
+  salesTax    String
+  bottomOther String
+  grandTotal  String
+  sign        String
+  signDate    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  User   User   @relation(fields: [userId], references: [id])
+}
