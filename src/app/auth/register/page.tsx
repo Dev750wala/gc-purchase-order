@@ -6,22 +6,19 @@ import Link from 'next/link'
 
 export default function RegisterPage() {
     const router = useRouter()
-    const [error, setError] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState('')
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setLoading(true)
-        setError(null)
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setError('')
 
-        const formData = new FormData(e.currentTarget)
+        const formData = new FormData(event.currentTarget)
         const data = {
             email: formData.get('email') as string,
             password: formData.get('password') as string,
             name: formData.get('name') as string,
             phoneNumber: formData.get('phoneNumber') as string,
             empId: formData.get('empId') as string,
-            role: formData.get('role') as string,
         }
 
         try {
@@ -34,37 +31,41 @@ export default function RegisterPage() {
             })
 
             if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.message || 'Something went wrong')
+                const errorData = await response.json()
+                throw new Error(errorData.message || 'Registration failed')
             }
 
-            router.push('/auth/login')
+            router.push('/auth/login?registered=true')
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Something went wrong')
-        } finally {
-            setLoading(false)
+            if (error instanceof Error) {
+                setError(error.message)
+            } else {
+                setError('An unexpected error occurred')
+            }
         }
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center">
-            <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-6 shadow-md">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-md w-full space-y-8">
                 <div>
-                    <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-                        Create a new account
+                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                        Create your account
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
                         Or{' '}
-                        <Link
-                            href="/auth/login"
-                            className="font-medium text-indigo-600 hover:text-indigo-500"
-                        >
+                        <Link href="/auth/login" className="font-medium text-blue-600 hover:text-blue-500">
                             sign in to your account
                         </Link>
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                    <div className="space-y-4 rounded-md shadow-sm">
+                    {error && (
+                        <div className="rounded-md bg-red-50 p-4">
+                            <div className="text-sm text-red-700">{error}</div>
+                        </div>
+                    )}
+                    <div className="rounded-md shadow-sm -space-y-px">
                         <div>
                             <label htmlFor="email" className="sr-only">
                                 Email address
@@ -73,8 +74,9 @@ export default function RegisterPage() {
                                 id="email"
                                 name="email"
                                 type="email"
+                                autoComplete="email"
                                 required
-                                className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Email address"
                             />
                         </div>
@@ -86,8 +88,9 @@ export default function RegisterPage() {
                                 id="password"
                                 name="password"
                                 type="password"
+                                autoComplete="new-password"
                                 required
-                                className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Password"
                             />
                         </div>
@@ -99,8 +102,9 @@ export default function RegisterPage() {
                                 id="name"
                                 name="name"
                                 type="text"
+                                autoComplete="name"
                                 required
-                                className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Full Name"
                             />
                         </div>
@@ -112,8 +116,9 @@ export default function RegisterPage() {
                                 id="phoneNumber"
                                 name="phoneNumber"
                                 type="tel"
+                                autoComplete="tel"
                                 required
-                                className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Phone Number"
                             />
                         </div>
@@ -126,40 +131,18 @@ export default function RegisterPage() {
                                 name="empId"
                                 type="text"
                                 required
-                                className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                                 placeholder="Employee ID"
                             />
                         </div>
-                        <div>
-                            <label htmlFor="role" className="sr-only">
-                                Role
-                            </label>
-                            <select
-                                id="role"
-                                name="role"
-                                required
-                                className="relative block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:z-10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                            >
-                                <option value="">Select a role</option>
-                                <option value="admin">Admin</option>
-                                <option value="user">User</option>
-                            </select>
-                        </div>
                     </div>
-
-                    {error && (
-                        <div className="text-center text-sm text-red-600">
-                            {error}
-                        </div>
-                    )}
 
                     <div>
                         <button
                             type="submit"
-                            disabled={loading}
-                            className="group relative flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                            {loading ? 'Creating account...' : 'Create account'}
+                            Register
                         </button>
                     </div>
                 </form>

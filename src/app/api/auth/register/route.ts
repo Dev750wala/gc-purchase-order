@@ -4,10 +4,10 @@ import db from '@/lib/db'
 
 export async function POST(req: Request) {
     try {
-        const { email, password, name, phoneNumber, empId, role } = await req.json()
+        const { email, password, name, phoneNumber, empId } = await req.json()
 
         // Validate required fields
-        if (!email || !password || !name || !phoneNumber || !empId || !role) {
+        if (!email || !password || !name || !phoneNumber || !empId) {
             return NextResponse.json(
                 { message: 'All fields are required' },
                 { status: 400 }
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
                 name,
                 phoneNumber: BigInt(phoneNumber),
                 empId,
-                role,
+                // isAdmin will be false by default
             },
         })
 

@@ -15,108 +15,163 @@ datasource db {
 }
 
 model User {
-  id    String  @id @default(cuid())
-  email String  @unique
-  name  String?
-  phoneNumber BigInt
-  empId String
-  role String
-  pfpUrl String?
-  password String
-  PurchaseOrder PurchaseOrder[]
+  id            String            @id @default(cuid())
+  email         String            @unique
+  name          String?
+  phoneNumber   BigInt
+  empId         String
+  isAdmin       Boolean           @default(false)
+  pfpUrl        String?
+  password      String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Parent represents the direct supervisor (used to construct the approval hierarchy tree)
+  parentId      String?
+  parent        User?             @relation("UserHierarchy", fields: [parentId], references: [id])
+  children User[] @relation("UserHierarchy")
+
+  // Relations
+  purchaseOrders PurchaseOrder[]  // POs created by this user
+  poAudits       POAudit[]        // Actions this user took on POs
+  notifications  Notification[]   // Notifications assigned to this user
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 }
 
 model PurchaseOrder {
-  id                String   @id @default(cuid())
-  masterPO          Boolean
-  PO                String
+  id            String            @id @default(cuid())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id])
 
-  // Left Section
-  date              String
-  vendor            String
-  address1          String
-  attention         String
-  tel               String
-  ext               String
-  email             String
-  holdToShipYes     Boolean
-  holdToShipNo      Boolean
-  pickUp            Boolean
-  shipTo            Boolean
-  driverContact     String
-  driverTel         String
-  siteContact       String
-  siteTel           String
-  address2          String
-  deliveryNotes     String
-  date1             String
-  time1             String
-  date2             String
-  time2             String
-  date3             String
-  time3             String
-  date4             String
-  time4             String
+  // Indicates which level is currently reviewing the PO
+  currentLevel  Int
 
-  // Right Section
-  jobNumber         String
-  jobName           String
-  jobTask           String
-  officeContact     String
-  officeTel         String
-  requestedBy       String
-  orderedBy         String
-  rightDate         String
-  rightTime         String
-  coCe              String
-  rightNotes        String
-  approxCost        String
-  amex              Boolean
-  amexText          String
-  cod               Boolean
-  onAccount         Boolean
-  other             Boolean
-  otherText         String
-  taxExemptYes      Boolean
-  taxExemptNo       Boolean
-  vendorQuoteYes    Boolean
-  vendorQuoteNo     Boolean
-  ccPo              String
-  author            String
-  authorSignature   String
-  pmName            String
-  pmSignature       String
-  approvedBy        String
-  approvedDate      String
-  rightBottomNotes  String
+  // Flattened fields representing the purchase order form
+  masterPO      Boolean           @default(false)
+  PO            String
+  date          String
+  vendor        String
+  address1      String
+  attention     String
+  tel           String
+  ext           String
+  email         String
+  holdToShipYes Boolean
+  holdToShipNo  Boolean
+  pickUp        Boolean
+  shipTo        Boolean
+  driverContact String
+  driverTel     String
+  siteContact   String
+  siteTel       String
+  address2      String
+  deliveryNotes String
+  date1         String
+  time1         String
+  date2         String
+  time2         String
+  date3         String
+  time3         String
+  date4         String
+  time4         String
+  jobNumber     String
+  jobName       String
+  jobTask       String
+  officeContact String
+  officeTel     String
+  requestedBy   String
+  orderedBy     String
+  rightDate     String
+  rightTime     String
+  coCe          String
+  rightNotes    String
+  approxCost    String
+  amex          Boolean
+  amexText      String
+  cod           Boolean
+  onAccount     Boolean
+  other         Boolean
+  otherText     String
+  taxExemptYes  Boolean
+  taxExemptNo   Boolean
+  vendorQuoteYes Boolean
+  vendorQuoteNo  Boolean
+  ccPo          String
+  author        String
+  authorSignature String
+  pmName        String
+  pmSignature   String
+  approvedBy    String
+  approvedDate  String
+  rightBottomNotes String
+  description   String
+  quantity      String
+  um            String
+  unitCost      String
+  total         String
+  jobEquipNotes String
+  costCode      String
+  payItem       String
+  subtotal      String
+  delivery      String
+  salesTax      String
+  bottomOther   String
+  grandTotal    String
+  sign          String
+  signDate      String
 
-  // Flattened Line Item Fields
-  description       String
-  quantity          String
-  um                String
-  unitCost          String
-  total             String
-  jobEquipNotes     String
-  costCode          String
-  payItem           String
+  // Relations
+  poAudits      POAudit[]        // Track all user actions taken on this PO
+  notifications Notification[]   // All notifications related to this PO
 
-  // Bottom Section
-  subtotal          String
-  delivery          String
-  salesTax          String
-  bottomOther       String
-  grandTotal        String
-  sign              String
-  signDate          String
-
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  userId String
-  User User @relation(fields: [userId], references: [id])
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 }
 
+model POAudit {
+  id        String     @id @default(cuid())
+  poId      String
+  po        PurchaseOrder @relation(fields: [poId], references: [id])
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  action    POAction   // Action type taken (view/edit/accept/reject/submit)
+  comment   String?    // Optional comment on the action
+  timestamp DateTime   @default(now())
 
+  // PO status as perceived by this user (moved from PurchaseOrder)
+  status    POStatus
+}
+
+model Notification {
+  id        String     @id @default(cuid())
+  poId      String
+  po        PurchaseOrder @relation(fields: [poId], references: [id])
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  type      NotificationType  // Notification reason
+  read      Boolean    @default(false)
+  createdAt DateTime   @default(now())
+}
+
+enum POStatus {
+  SUBMITTED       // PO is created and submitted by the user
+  UNDER_REVIEW    // PO has been accepted at one level, pending upper level approval
+  APPROVED        // PO fully approved by the top-level (admin)
+  REJECTED        // Rejected by a reviewer and returned to the creator or specific level
+  ARCHIVED        // PO archived for historical record (per-user basis, not global)
+}
+
+enum POAction {
+  VIEW            // User viewed the PO
+  EDIT            // User edited the PO
+  ACCEPT          // User approved the PO
+  REJECT          // User rejected the PO
+  SUBMIT          // User initially submitted the PO
+}
+
+enum NotificationType {
+  NEW_REVIEW      // PO requires review
+  REJECTED        // PO has been rejected
+  APPROVED        // PO has been approved
+  EDITED          // PO was edited during review
+}

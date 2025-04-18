@@ -38,7 +38,7 @@ export const authOptions: AuthOptions = {
                     name: user.name,
                     phoneNumber: user.phoneNumber.toString(),
                     empId: user.empId,
-                    role: user.role,
+                    isAdmin: user.isAdmin,
                 }
             },
         }),
@@ -49,7 +49,7 @@ export const authOptions: AuthOptions = {
                 token.id = user.id
                 token.phoneNumber = user.phoneNumber
                 token.empId = user.empId
-                token.role = user.role
+                token.isAdmin = user.isAdmin
             }
             return token
         },
@@ -58,7 +58,7 @@ export const authOptions: AuthOptions = {
                 session.user.id = token.id as string
                 session.user.phoneNumber = token.phoneNumber as string
                 session.user.empId = token.empId as string
-                session.user.role = token.role as string
+                session.user.isAdmin = token.isAdmin as boolean
             }
             return session
         },

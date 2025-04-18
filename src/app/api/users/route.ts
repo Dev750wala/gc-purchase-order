@@ -7,7 +7,7 @@ export async function GET() {
     try {
         const session = await getServerSession(authOptions)
 
-        if (!session || session.user.role !== 'admin') {
+        if (!session || !session.user.isAdmin) {
             return NextResponse.json(
                 { message: 'Unauthorized' },
                 { status: 401 }
@@ -21,15 +21,17 @@ export async function GET() {
                 name: true,
                 phoneNumber: true,
                 empId: true,
-                role: true,
+                isAdmin: true,
             },
         })
 
-        // Convert BigInt phoneNumber to string for each user
-        const usersWithStringPhoneNumber = users.map(user => ({
-            ...user,
-            phoneNumber: user.phoneNumber.toString()
-        }))
+        // Ensure users is an array and convert BigInt phoneNumber to string
+        const usersWithStringPhoneNumber = Array.isArray(users) 
+            ? users.map(user => ({
+                ...user,
+                phoneNumber: user.phoneNumber.toString()
+            }))
+            : []
 
         return NextResponse.json(usersWithStringPhoneNumber)
     } catch (error) {

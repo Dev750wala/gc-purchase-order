@@ -123,15 +123,18 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   phoneNumber: 'phoneNumber',
   empId: 'empId',
-  role: 'role',
+  isAdmin: 'isAdmin',
   pfpUrl: 'pfpUrl',
   password: 'password',
+  parentId: 'parentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
 exports.Prisma.PurchaseOrderScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
+  currentLevel: 'currentLevel',
   masterPO: 'masterPO',
   PO: 'PO',
   date: 'date',
@@ -205,8 +208,26 @@ exports.Prisma.PurchaseOrderScalarFieldEnum = {
   sign: 'sign',
   signDate: 'signDate',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  userId: 'userId'
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.POAuditScalarFieldEnum = {
+  id: 'id',
+  poId: 'poId',
+  userId: 'userId',
+  action: 'action',
+  comment: 'comment',
+  timestamp: 'timestamp',
+  status: 'status'
+};
+
+exports.Prisma.NotificationScalarFieldEnum = {
+  id: 'id',
+  poId: 'poId',
+  userId: 'userId',
+  type: 'type',
+  read: 'read',
+  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -223,11 +244,34 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.POAction = exports.$Enums.POAction = {
+  VIEW: 'VIEW',
+  EDIT: 'EDIT',
+  ACCEPT: 'ACCEPT',
+  REJECT: 'REJECT',
+  SUBMIT: 'SUBMIT'
+};
 
+exports.POStatus = exports.$Enums.POStatus = {
+  SUBMITTED: 'SUBMITTED',
+  UNDER_REVIEW: 'UNDER_REVIEW',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  ARCHIVED: 'ARCHIVED'
+};
+
+exports.NotificationType = exports.$Enums.NotificationType = {
+  NEW_REVIEW: 'NEW_REVIEW',
+  REJECTED: 'REJECTED',
+  APPROVED: 'APPROVED',
+  EDITED: 'EDITED'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
-  PurchaseOrder: 'PurchaseOrder'
+  PurchaseOrder: 'PurchaseOrder',
+  POAudit: 'POAudit',
+  Notification: 'Notification'
 };
 
 /**

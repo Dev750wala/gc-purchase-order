@@ -1,130 +1,74 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
-interface User {
-    id: string
-    email: string
-    name: string | null
-    phoneNumber: number | null
-    empId: string | null
-    role: string | null
-}
-
-export default function HomePage() {
+export default function Home() {
     const { data: session } = useSession()
-    const [users, setUsers] = useState<User[]>([])
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        if (session?.user.role === 'admin') {
-            fetch('/api/users')
-                .then(res => res.json())
-                .then(data => setUsers(data))
-                .finally(() => setLoading(false))
-        } else {
-            setLoading(false)
-        }
-    }, [session])
-
-    if (!session) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold">Not authenticated</h1>
-                    <p className="mt-2">Please sign in to view this page</p>
-                </div>
-            </div>
-        )
-    }
 
     return (
-        <div className="min-h-screen p-8">
-            <div className="mx-auto max-w-4xl">
-                <div className="mb-8">
-                    <h1 className="text-2xl font-bold">Welcome, {session.user.name || 'User'}!</h1>
-                    <p className="text-gray-600">Role: {session.user.role}</p>
-                </div>
-
-                {session.user.role === 'admin' ? (
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
-                        <div className="px-4 py-5 sm:px-6">
-                            <h2 className="text-xl font-semibold">All Users</h2>
+        <main className="min-h-screen p-8">
+            <div className="max-w-4xl mx-auto">
+                <h1 className="text-3xl font-bold mb-8">Welcome to Purchase Order System</h1>
+                
+                {session ? (
+                    <div className="bg-white rounded-lg shadow p-6">
+                        <h2 className="text-xl font-semibold mb-4">User Information</h2>
+                        <div className="space-y-2">
+                            <p className="text-gray-600">Email: {session.user.email}</p>
+                            <p className="text-gray-600">Name: {session.user.name || 'Not set'}</p>
+                            <p className="text-gray-600">Employee ID: {session.user.empId}</p>
+                            <p className="text-gray-600">Phone: {session.user.phoneNumber}</p>
+                            <p className="text-gray-600">Admin: {session.user.isAdmin ? 'Yes' : 'No'}</p>
                         </div>
-                        {loading ? (
-                            <div className="p-4 text-center">Loading...</div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Name
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Email
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Role
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Employee ID
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {users.map((user) => (
-                                            <tr key={user.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    {user.name}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {user.email}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {user.role}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                    {user.empId}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+
+                        {session.user.isAdmin && (
+                            <div className="mt-6">
+                                <h3 className="text-lg font-semibold mb-2">Admin Actions</h3>
+                                <div className="space-x-4">
+                                    <Link 
+                                        href="/users" 
+                                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                    >
+                                        Manage Users
+                                    </Link>
+                                </div>
                             </div>
                         )}
+
+                        <div className="mt-6">
+                            <h3 className="text-lg font-semibold mb-2">Quick Actions</h3>
+                            <div className="space-x-4">
+                                <Link 
+                                    href="/purchase-orders" 
+                                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                                >
+                                    View Purchase Orders
+                                </Link>
+                                <Link 
+                                    href="/purchase-orders/new" 
+                                    className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600"
+                                >
+                                    Create New PO
+                                </Link>
+                            </div>
+                        </div>
                     </div>
                 ) : (
                     <div className="bg-white rounded-lg shadow p-6">
-                        <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Email</p>
-                                <p className="font-medium">{session.user.email}</p>
-                            </div>
-                            {session.user.phoneNumber && (
-                                <div>
-                                    <p className="text-sm text-gray-500">Phone Number</p>
-                                    <p className="font-medium">{session.user.phoneNumber}</p>
-                                </div>
-                            )}
-                            {session.user.empId && (
-                                <div>
-                                    <p className="text-sm text-gray-500">Employee ID</p>
-                                    <p className="font-medium">{session.user.empId}</p>
-                                </div>
-                            )}
-                            {session.user.role && (
-                                <div>
-                                    <p className="text-sm text-gray-500">Role</p>
-                                    <p className="font-medium">{session.user.role}</p>
-                                </div>
-                            )}
-                        </div>
+                        <h2 className="text-xl font-semibold mb-4">Please Sign In</h2>
+                        <p className="text-gray-600 mb-4">
+                            You need to sign in to access the purchase order system.
+                        </p>
+                        <Link 
+                            href="/auth/login" 
+                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                        >
+                            Sign In
+                        </Link>
                     </div>
                 )}
             </div>
-        </div>
+        </main>
     )
 }
